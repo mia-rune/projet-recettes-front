@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiamCraft - Home</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+    <link rel="stylesheet" href="./css/modale.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">MiamCraft.com</a>
+
+                <div class="search-bar">
+                    <input type="text" placeholder="Rechercher...">
+                    <button type="submit"><img src="./assets/imgs/magnifying-glass.png" alt="🔍"></button>
+                </div>
+
+                <nav>
+                    <ul>
+                        <li><a href="#">Acceuil</a></li>
+                        <li><a href="#">Recettes</a></li>
+                        <li><a href="#">Catégories</a></li>
+                        <li><a href="#">À propos</a></li>
+                        <li><a href="#">Se connecter</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- add modale -->
+    <div id="recipeModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle">Ajouter une nouvelle recette</h2>
+            <form id="recipeForm">
+                <div class="form-group">
+                    <label for="titleInput">Titre</label>
+                    <input type="text" id="titleInput" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="descriptionInput">Description</label>
+                    <textarea id="descriptionInput" placeholder="Une courte description de votre recette..."
+                        required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categoryInput">Catégorie</label>
+                        <select id="categoryInput" required>
+                            <option value="">Choisir une catégorie</option>
+                            <option value="entrée">Entrée</option>
+                            <option value="plat principal">Plat principal</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficultyInput">Difficulté</label>
+                        <select id="difficultyInput" required>
+                            <option value="">Choisir une difficulté</option>
+                            <option value="facile">Facile</option>
+                            <option value="moyen">Moyen</option>
+                            <option value="difficile">Difficile</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prepTimeInput">Temps de préparation (min)</label>
+                        <input type="number" id="prepTimeInput" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cookingTimeInput">Temps de cuisson (min)</label>
+                        <input type="number" id="cookingTimeInput" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ingrédients</label>
+                    <div class="ingredient-input">
+                        <input type="text" id="ingredientInput" placeholder="Ajouter un ingrédient">
+                        <button type="button" id="addIngredientBtn" class="btn-add-ingredient">Ajouter</button>
+                    </div>
+                    <div id="ingredientsList" class="ingredients-list"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="instructionsInput">Instructions</label>
+                    <textarea id="instructionsInput" placeholder="Décrivez la préparation étape par étape..."
+                        required></textarea>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-primary">Ajouter la recette</button>
+                    <button type="button" id="cancelBtn" class="btn-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <main>
+        <div class="container">
+            <section class="hero">
+                <h1>Répertoriez vos recettes facilement sur MiamCraft</h1>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit dicta obcaecati voluptatibus qui
+                    libero praesentium adipisci illo et! Quasi sequi esse suscipit voluptate non placeat magni eveniet
+                    iure fugit quaerat!</p>
+            </section>
+
+            <section class="filters">
+                <span class="filters-label">Filtrer par :</span>
+                <select id="categoryFilter">
+                    <option value="">Toutes catégories</option>
+                    <option value="entrée">Entrée</option>
+                    <option value="plat principal">Plat principal</option>
+                    <option value="dessert">Dessert</option>
+                </select>
+                <select id="difficultyFilter">
+                    <option value="">Toutes difficultés</option>
+                    <option value="facile">Facile</option>
+                    <option value="moyen">Moyen</option>
+                    <option value="difficile">Difficile</option>
+                </select>
+                <button id="clearFilters" class="btn-clear-filters">
+                    Effacer filtres
+                </button>
+            </section>
+
+            <section class="recipe-grid">
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>2025 © MiamCraft. Tous droits réservés.</p>
+                <div class="footer-links">
+                    <a href="#">Nous contacter</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Conditions Générales</a>
+                    <a href="#">Mentions légales</a>
+                    <a href="#">Politique de Confidentialité</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/modale.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+
+</html>

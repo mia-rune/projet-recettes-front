@@ -233,11 +233,13 @@ main {
     font-size: 15px;
 }
 
-.recipe-foot {
+
+.recipe-foot-full{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    font-size: 13px;
+    gap: 30px;
+    font-size: 14px;
     font-weight: 600;
     margin-top: auto;
 }

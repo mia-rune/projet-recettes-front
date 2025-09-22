@@ -38,7 +38,7 @@
     <div id="recipeModal" class="modal hidden">
         <div class="modal-content">
             <h2 id="modalTitle">Ajouter une nouvelle recette</h2>
-            <form id="recipeForm">
+            <form id="recipeForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="titleInput">Titre</label>
                     <input type="text" id="titleInput" required>
@@ -82,6 +82,12 @@
                         <label for="cookingTimeInput">Temps de cuisson (min)</label>
                         <input type="number" id="cookingTimeInput" min="0" required>
                     </div>
+                </div>
+
+                <!-- Ajout du champ image -->
+                <div class="form-group">
+                    <label for="imageInput">Image de la recette</label>
+                    <input type="file" id="imageInput" name="image" accept="image/*">
                 </div>
 
                 <div class="form-group">

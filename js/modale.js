@@ -5,15 +5,18 @@ let currentRecipeId = null;
 function openRecipeModal(recipe = null) {
     const modal = document.getElementById('recipeModal');
     const title = document.getElementById('modalTitle');
+    const submitButton = document.querySelector('.btn-primary');
 
     if (recipe) {
         // Mode modification
         title.textContent = 'Modifier la recette';
+        submitButton.textContent = 'Modifier la recette';
         currentRecipeId = recipe._id;
         fillFormWithRecipe(recipe);
     } else {
         // Mode ajout
         title.textContent = 'Ajouter une recette';
+        submitButton.textContent = 'Ajouter la recette';
         currentRecipeId = null;
         document.getElementById('recipeForm').reset();
         ingredients = [];
@@ -86,31 +89,62 @@ async function submitRecipe(e) {
         return;
     }
 
-    const recipeData = {
-        title: document.getElementById('titleInput').value,
-        description: document.getElementById('descriptionInput').value,
-        category: document.getElementById('categoryInput').value,
-        difficulty: document.getElementById('difficultyInput').value,
-        prepTime: parseInt(document.getElementById('prepTimeInput').value),
-        cookingTime: parseInt(document.getElementById('cookingTimeInput').value),
-        instructions: document.getElementById('instructionsInput').value,
-        ingredients: ingredients
-    };
-
     try {
-        const url = currentRecipeId
-            ? `http://localhost:2000/recipes/${currentRecipeId}`
-            : 'http://localhost:2000/recipes';
+        let response;
+        
+        if (currentRecipeId) {
+            // MODE MODIFICATION - Utiliser JSON
+            const recipeData = {
+                title: document.getElementById('titleInput').value,
+                description: document.getElementById('descriptionInput').value,
+                category: document.getElementById('categoryInput').value,
+                difficulty: document.getElementById('difficultyInput').value,
+                prepTime: parseInt(document.getElementById('prepTimeInput').value),
+                cookingTime: parseInt(document.getElementById('cookingTimeInput').value),
+                instructions: document.getElementById('instructionsInput').value,
+                ingredients: ingredients
+            };
 
-        const method = currentRecipeId ? 'PUT' : 'POST';
+            console.log('Données de modification:', recipeData);
+            console.log('ID de la recette:', currentRecipeId);
 
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(recipeData)
-        });
+            response = await fetch(`http://localhost:2000/recipes/${currentRecipeId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(recipeData)
+            });
+        } else {
+            // MODE AJOUT - Utiliser FormData pour l'image
+            const formData = new FormData();
+            formData.append('title', document.getElementById('titleInput').value);
+            formData.append('description', document.getElementById('descriptionInput').value);
+            formData.append('category', document.getElementById('categoryInput').value);
+            formData.append('difficulty', document.getElementById('difficultyInput').value);
+            formData.append('prepTime', document.getElementById('prepTimeInput').value);
+            formData.append('cookingTime', document.getElementById('cookingTimeInput').value);
+            formData.append('instructions', document.getElementById('instructionsInput').value);
+            
+            ingredients.forEach(ingredient => {
+                formData.append('ingredients', ingredient);
+            });
+
+            const imageInput = document.getElementById('imageInput');
+            if (imageInput && imageInput.files[0]) {
+                formData.append('image', imageInput.files[0]);
+            }
+
+            response = await fetch('http://localhost:2000/recipes', {
+                method: 'POST',
+                body: formData
+            });
+        }
 
         if (response.ok) {
+            const result = await response.json();
+            console.log('Réponse du serveur:', result);
+            
             closeRecipeModal();
 
             // Recharger selon le contexte
@@ -124,9 +158,12 @@ async function submitRecipe(e) {
             const message = currentRecipeId ? 'Recette modifiée avec succès!' : 'Recette ajoutée avec succès!';
             alert(message);
         } else {
-            alert('Erreur lors de la sauvegarde');
+            const errorData = await response.json();
+            console.error('Erreur serveur:', errorData);
+            alert(`Erreur: ${errorData.error || 'Erreur lors de la sauvegarde'}`);
         }
     } catch (error) {
+        console.error('Erreur:', error);
         alert('Erreur de connexion');
     }
 }

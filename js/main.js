@@ -15,10 +15,13 @@ async function fetchRecipes(search = '', category = '', difficulty = '') {
         url += params.toString();
         
         const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         recipes = await response.json();
         displayRecipes(recipes);
     } catch (error) {
-        console.log(error);
+        console.error('Erreur lors du chargement:', error);
         recipeGrid.innerHTML = "<p>Erreur lors du chargement des recettes.</p>";
     }
 }
@@ -74,9 +77,17 @@ function displayRecipes(recipes) {
         
         const totalTime = recipe.prepTime + recipe.cookingTime;
         
+        // Gestion de l'image
+        let imageContent;
+        if (recipe.image) {
+            imageContent = `<img src="http://localhost:2000/uploads/${recipe.image}" alt="${recipe.title}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        } else {
+            imageContent = 'Photo du plat';
+        }
+        
         recipeCard.innerHTML = `
             <div class="recipe-image">
-                Photo du plat
+                ${imageContent}
             </div>
             <div class="recipe-info">
                 <h3 class="recipe-title">${recipe.title}</h3>

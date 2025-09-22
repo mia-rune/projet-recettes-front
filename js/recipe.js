@@ -9,6 +9,9 @@ function getRecipeIdFromUrl() {
 async function getRecipe(id) {
     try {
         const response = await fetch(`http://localhost:2000/recipes/${id}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const recipe = await response.json();
         currentRecipe = recipe;
         displayRecipe(recipe);
@@ -38,6 +41,27 @@ function displayRecipe(recipe) {
     difficultyElement.className = `recipe-difficulty ${difficultyClass}`;
     difficultyElement.textContent = `● ${recipe.difficulty}`;
 
+    // Image - CORRECTION ICI
+    const recipeImageContainer = document.getElementById('recipe-image');
+    console.log('Image dans la recette:', recipe.image); // Debug
+    
+    if (recipe.image) {
+        const imageUrl = `http://localhost:2000/uploads/${recipe.image}`;
+        console.log('URL de l\'image:', imageUrl); // Debug
+        
+        recipeImageContainer.innerHTML = `
+            <img src="${imageUrl}" 
+                 alt="${recipe.title}" 
+                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;"
+                 onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-image&quot;>Image non trouvée</div>'">
+        `;
+    } else {
+        console.log('Aucune image pour cette recette'); // Debug
+        recipeImageContainer.innerHTML = `
+            <div class="placeholder-image">Photo du plat</div>
+        `;
+    }
+
     // Ingrédients
     const ingredientsList = document.getElementById('ingredients-list');
     ingredientsList.innerHTML = '';
@@ -54,14 +78,21 @@ function displayRecipe(recipe) {
     document.getElementById('recipe-template').classList.remove('hidden');
 
     // Event listeners pour les boutons
-    document.querySelector('.delete-btn').addEventListener('click', () => {
-        const recipeId = getRecipeIdFromUrl();
-        deleteRecipe(recipeId);
-    });
+    const deleteBtn = document.querySelector('.delete-btn');
+    const editBtn = document.querySelector('.edit-btn');
+    
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            const recipeId = getRecipeIdFromUrl();
+            deleteRecipe(recipeId);
+        });
+    }
 
-    document.querySelector('.edit-btn').addEventListener('click', () => {
-        openRecipeModal(currentRecipe);
-    });
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            openRecipeModal(currentRecipe);
+        });
+    }
 
     // Titre de la page
     document.title = `MiamCraft - ${recipe.title}`;
@@ -69,7 +100,16 @@ function displayRecipe(recipe) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const recipeId = getRecipeIdFromUrl();
-    getRecipe(recipeId);
+    if (recipeId) {
+        getRecipe(recipeId);
+    } else {
+        recipeDetail.innerHTML = `
+            <div class="error-message">
+                <h2>Erreur</h2>
+                <p>ID de recette manquant dans l'URL.</p>
+            </div>
+        `;
+    }
 });
 
 async function deleteRecipe(recipeId) {
@@ -88,7 +128,8 @@ async function deleteRecipe(recipeId) {
             alert("Recette supprimée avec succès");
             window.location.href = 'index.html';
         } else {
-            alert("Erreur lors de la suppression");
+            const errorData = await response.json();
+            alert(`Erreur: ${errorData.error || 'Erreur lors de la suppression'}`);
         }
     } catch (error) {
         console.log(error);

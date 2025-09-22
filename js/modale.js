@@ -13,6 +13,7 @@ function openRecipeModal(recipe = null) {
         submitButton.textContent = 'Modifier la recette';
         currentRecipeId = recipe._id;
         fillFormWithRecipe(recipe);
+        console.log('Mode modification activé pour la recette:', recipe._id);
     } else {
         // Mode ajout
         title.textContent = 'Ajouter une recette';
@@ -20,6 +21,7 @@ function openRecipeModal(recipe = null) {
         currentRecipeId = null;
         document.getElementById('recipeForm').reset();
         ingredients = [];
+        console.log('Mode ajout activé');
     }
 
     updateIngredientsList();
@@ -36,14 +38,19 @@ function closeRecipeModal() {
 
 // Remplir le formulaire pour modification
 function fillFormWithRecipe(recipe) {
-    document.getElementById('titleInput').value = recipe.title;
-    document.getElementById('descriptionInput').value = recipe.description;
-    document.getElementById('categoryInput').value = recipe.category;
-    document.getElementById('difficultyInput').value = recipe.difficulty;
-    document.getElementById('prepTimeInput').value = recipe.prepTime;
-    document.getElementById('cookingTimeInput').value = recipe.cookingTime;
-    document.getElementById('instructionsInput').value = recipe.instructions;
-    ingredients = [...recipe.ingredients];
+    console.log('Remplissage du formulaire avec:', recipe);
+    
+    document.getElementById('titleInput').value = recipe.title || '';
+    document.getElementById('descriptionInput').value = recipe.description || '';
+    document.getElementById('categoryInput').value = recipe.category || '';
+    document.getElementById('difficultyInput').value = recipe.difficulty || '';
+    document.getElementById('prepTimeInput').value = recipe.prepTime || '';
+    document.getElementById('cookingTimeInput').value = recipe.cookingTime || '';
+    document.getElementById('instructionsInput').value = recipe.instructions || '';
+    
+    // Copier les ingrédients
+    ingredients = recipe.ingredients ? [...recipe.ingredients] : [];
+    console.log('Ingrédients chargés:', ingredients);
 }
 
 // Ajouter un ingrédient
@@ -89,10 +96,15 @@ async function submitRecipe(e) {
         return;
     }
 
+    // Mémoriser le mode avant de faire quoi que ce soit
+    const isEditMode = currentRecipeId !== null && currentRecipeId !== undefined;
+    console.log('Mode détecté:', isEditMode ? 'MODIFICATION' : 'AJOUT');
+    console.log('currentRecipeId:', currentRecipeId);
+
     try {
         let response;
         
-        if (currentRecipeId) {
+        if (isEditMode) {
             // MODE MODIFICATION - Utiliser JSON
             const recipeData = {
                 title: document.getElementById('titleInput').value,
@@ -105,8 +117,8 @@ async function submitRecipe(e) {
                 ingredients: ingredients
             };
 
-            console.log('Données de modification:', recipeData);
-            console.log('ID de la recette:', currentRecipeId);
+            console.log('Données de modification envoyées:', recipeData);
+            console.log('URL de modification:', `http://localhost:2000/recipes/${currentRecipeId}`);
 
             response = await fetch(`http://localhost:2000/recipes/${currentRecipeId}`, {
                 method: 'PUT',
@@ -115,6 +127,9 @@ async function submitRecipe(e) {
                 },
                 body: JSON.stringify(recipeData)
             });
+            
+            console.log('Réponse reçue - Status:', response.status);
+            
         } else {
             // MODE AJOUT - Utiliser FormData pour l'image
             const formData = new FormData();
@@ -135,6 +150,8 @@ async function submitRecipe(e) {
                 formData.append('image', imageInput.files[0]);
             }
 
+            console.log('Données d\'ajout envoyées via FormData');
+
             response = await fetch('http://localhost:2000/recipes', {
                 method: 'POST',
                 body: formData
@@ -145,26 +162,34 @@ async function submitRecipe(e) {
             const result = await response.json();
             console.log('Réponse du serveur:', result);
             
+            // Afficher le message AVANT de fermer la modale (au cas où closeRecipeModal() réinitialise currentRecipeId)
+            const message = isEditMode ? 'Recette modifiée avec succès!' : 'Recette ajoutée avec succès!';
+            
             closeRecipeModal();
 
             // Recharger selon le contexte
             if (typeof fetchRecipes === 'function') {
-                fetchRecipes(); // Page index
+                await fetchRecipes(); // Page index
             } else if (typeof getRecipe === 'function') {
                 const recipeId = getRecipeIdFromUrl();
-                getRecipe(recipeId); // Page recipe
+                await getRecipe(recipeId); // Page recipe
             }
 
-            const message = currentRecipeId ? 'Recette modifiée avec succès!' : 'Recette ajoutée avec succès!';
             alert(message);
         } else {
-            const errorData = await response.json();
-            console.error('Erreur serveur:', errorData);
-            alert(`Erreur: ${errorData.error || 'Erreur lors de la sauvegarde'}`);
+            const errorText = await response.text();
+            console.error('Erreur serveur:', errorText);
+            
+            try {
+                const errorData = JSON.parse(errorText);
+                alert(`Erreur: ${errorData.error || 'Erreur lors de la sauvegarde'}`);
+            } catch {
+                alert(`Erreur: ${errorText || 'Erreur lors de la sauvegarde'}`);
+            }
         }
     } catch (error) {
-        console.error('Erreur:', error);
-        alert('Erreur de connexion');
+        console.error('Erreur lors de la requête:', error);
+        alert('Erreur de connexion au serveur');
     }
 }
 
